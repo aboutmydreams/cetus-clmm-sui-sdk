@@ -1,7 +1,7 @@
 import { DynamicFieldPage, SuiObjectResponse, SuiTransactionBlockResponse } from '@mysten/sui/client'
 import { normalizeSuiAddress } from '@mysten/sui/utils'
 import { Transaction } from '@mysten/sui/transactions'
-import { CachedContent, cacheTime24h, cacheTime5min, checkInvalidSuiAddress, d, getFutureTime } from '../utils'
+import { CachedContent, cacheTime24h, cacheTime5min, checkInvalidSuiAddress, getFutureTime } from '../utils'
 import {
   CreatePoolAddLiquidityParams,
   CreatePoolParams,
@@ -22,7 +22,6 @@ import { TickData } from '../types/clmmpool'
 import {
   ClmmFetcherModule,
   ClmmIntegratePoolModule,
-  ClmmIntegratePoolV2Module,
   ClmmPartnerModule,
   CLOCK_ADDRESS,
   DataPage,
@@ -42,7 +41,6 @@ import {
   RouterErrorCode,
   UtilsErrorCode,
 } from '../errors/errors'
-import { bcs } from '@mysten/bcs'
 
 type GetTickParams = {
   start: number[]
@@ -376,12 +374,7 @@ export class PoolModule implements IModule {
       params.metadata_b = params.metadata_a
       params.metadata_a = metadataB
     }
-
-    // if ('fix_amount_a' in params) {
     return await this.creatPoolAndAddLiquidity(params)
-    // }
-
-    // return await this.creatPool([params])
   }
 
   /**
@@ -552,11 +545,8 @@ export class PoolModule implements IModule {
       arguments: args,
     })
 
-    // if (params.fix_amount_a) {
     TransactionUtil.buildTransferCoinToSender(this._sdk, tx, primaryCoinAInputsR.targetCoin, params.coinTypeA)
     TransactionUtil.buildTransferCoinToSender(this._sdk, tx, primaryCoinBInputsR.targetCoin, params.coinTypeB)
-    // } else {
-    // }
 
     return tx
   }
@@ -814,7 +804,6 @@ export class PoolModule implements IModule {
       showDisplay,
       showType: true,
     })
-
 
     if (objectDataResponses[0].data?.content?.dataType !== 'moveObject') {
       throw new ClmmpoolsError(

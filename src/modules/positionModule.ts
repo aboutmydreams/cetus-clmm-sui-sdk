@@ -234,9 +234,7 @@ export class PositionModule implements IModule {
       })
 
       const objectFields = getObjectFields(dynamicFieldObject.data as any) as any
-
       const fields = objectFields.value.fields.value
-
       const positionReward = buildPositionReward(fields)
       return positionReward
     } catch (error) {
@@ -402,7 +400,6 @@ export class PositionModule implements IModule {
     tx = tx || new Transaction()
 
     const needOpenPosition = !isValidSuiObjectId(params.pos_id)
-
     const max_amount_a = BigInt(params.max_amount_a)
     const max_amount_b = BigInt(params.max_amount_b)
 

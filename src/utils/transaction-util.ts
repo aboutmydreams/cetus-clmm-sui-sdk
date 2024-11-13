@@ -942,7 +942,6 @@ export class TransactionUtil {
 
     if (fixAmount && Number(totalSelectedCoinAmount) > Number(amount)) {
       targetCoin = tx.splitCoins(primaryCoinAObject, [tx.pure.u64(amount)])
-      // tragetCoinAmount = amount.toString()
       originalSplitedCoin = primaryCoinAObject
     }
 
