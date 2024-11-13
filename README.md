@@ -19,90 +19,50 @@
     <a href="https://cetus-1.gitbook.io/cetus-developer-docs/developer/dev-overview"><strong>Explore the document »</strong></a>
 <br />
     <br />
-    <a href="https://github.com/CetusProtocol/cetus-clmm-sui-sdk/tree/main/examples">View Demo</a>
-    ·
-    <a href="https://github.com/CetusProtocol/cetus-clmm-sui-sdk/issues">Report Bug</a>
-    ·
   </p>
 </div>
-
-<!-- TABLE OF CONTENTS -->
-- [SDK configuration parameters](#sdk-configuration-parameters)
-- [Introduction](#introduction)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Setting Up Configuration](#setting-up-configuration)
-  - [Features Available Right Now](#features-available-right-now)
-    - [Query data](#query-data)
-    - [Pool and Position (Liquidity)](#pool-and-position-liquidity)
-    - [Swap with Partner](#swap-with-partner)
-    - [Smart Router for Swap](#smart-router-for-swap)
-      - [Smart Router V1](#smart-router-v1)
-      - [Smart Router V2](#smart-router-v2)
-    - [Swap Pre-calculating Result Show](#swap-pre-calculating-result-show)
-    - [Conversion between liquidity, tickIndex, sqrtPrice, and coinAmount.](#conversion-between-liquidity-tickindex-sqrtprice-and-coinamount)
-- [LICENSE](#license)
-
-## SDK configuration parameters
-
-- The contract address available for reference [cetus-developer-docs](https://cetus-1.gitbook.io/cetus-developer-docs/developer/via-sdk/getting-started#latest-sdk-config).
-- `simulationAccount` used to simulate trades and obtain tick data.
-- *Notes: Please exercise caution when using a mainnet network account with assets as your `simulationAccount`.*
-
 
 ## Introduction
 
 Cetus-CLMM-SUI-SDK is the official software development kit (SDK) specifically designed for seamless integration with Cetus-CLMM. It provides developers with the necessary tools and resources to easily connect and interact with Cetus-CLMM, enabling the development of robust and efficient applications.
 
-
 ## Getting Started
 To integrate our SDK into your local project, please follow the example steps provided below.
 Please see details in document.
 ### Prerequisites
-* npm
-    ```sh
-    npm i @cetusprotocol/cetus-sui-clmm-sdk
-    ```
+  ```sh
+  npm i @cetusprotocol/cetus-sui-clmm-sdk
+  ```
 
 ### Setting Up Configuration
-1. Initialize testnet (or mainnet) SdkOption
+Our SDK now includes a default initialization method that allows for quick generation of the Cetus SDK configuration. You can utilize the src/config/initCetusSDK method to swiftly initialize the configuration. You have the option to select either 'mainnet' or 'testnet' for the network.
+  ```typescript
+  import { initCetusSDK } from '@cetusprotocol/cetus-sui-clmm-sdk'
 
+  const cetusClmmSDK = initCetusSDK({network: 'mainnet})
+  ```
+If you wish to set your own full node URL and simulate address, you can do so as follows:
+  ```typescript
+  import { initCetusSDK } from '@cetusprotocol/cetus-sui-clmm-sdk'
 
-    **NOTICE** 
-    1. In this example, the contract address version may backward, please use the latest clmmpool and integrate address.
-    2. `simulationAccount` should be add an account address with a small amount of assets, it used to do estimated or other query object from.
-
-2. Instantiate one CetusClmmSDK
+  const network = 'mainnnet';
+  const fullNodeUrl = "https://..."
+  const simulationAccount = "0x..."
+  const cetusClmmSDK = initCetusSDK(network, fullNodeUrl, simulationAccount)
+  ```
 
 Now, you can start using Cetus SDK.
 
-### Features Available Right Now
-<a href="https://cetus-1.gitbook.io/cetus-developer-docs/developer/dev-overview"><strong> »»» See details in development document. </strong></a>
+### Typrscript Doc
+You can view this typescript sdk in 
+<a href="https://cetus-1.gitbook.io/cetus-developer-docs/developer/dev-overview"><strong> Cetus Development Documents. </strong></a>
 <br />
-
-1. Retrieve data
-1.1 Retrieve clmm pools
-1.2 Retrieve positions
-1.3 Retrieve reward
-1.4 Retrieve ticks
-2. Pools and postions
-2.1 Create clmm pool
-2.2 Open position
-2.3 Add liquidity
-2.4 Remove liquidity
-2.5 Close position
-2.6 Collect fees
-2.7 Collect rewards
-3. Swap
-3.1 Swap
-3.2 Partner swap
-3.3 Smart router v1 
-3.4 Smart router v2
-3.5 Price impact
-3.6 Minimum received & Maximum sold
-3.7 Fee
-4. Liquidity correlation calculation
-4.1 Liquidity correlation calculation
 
 ## LICENSE
 CETUS-SUI-SDK released under the Apache license. See the [LICENSE](./LICENSE) file for details.
+
+## More About Cetus
+Use the following links to learn more about Cetus:
+Learn more about working with Cetus in the [Cetus Documentation](https://cetus-1.gitbook.io/cetus-docs).
+
+Join the Cetus community on [Cetus Discord](https://discord.com/channels/1009749448022315008/1009751382783447072).

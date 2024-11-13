@@ -1,25 +1,29 @@
 import BN from 'bn.js'
 import {
-  TestnetCoin,
   buildSdk,
   buildTestAccount as buildTestAccountNew,
   buildTestPool,
   SdkEnv,
   USDT_USDC_POOL_10,
+  MainnetCoin,
 } from './data/init_test_data'
 import 'isomorphic-fetch'
 import { printTransaction } from '../src/utils/transaction-util'
-import { adjustForSlippage, d, Percentage, TransactionUtil } from '../src'
+import { adjustForSlippage, d, initCetusSDK, Percentage, TransactionUtil } from '../src'
 import { assert } from 'console'
 
 describe('Swap calculate Module', () => {
-  const sdk = buildSdk(SdkEnv.mainnet)
+  // const network = 'mainnet'
+  let fullNodeUrl // optional
+  let simulationAccount // optional
+
+  const sdk = initCetusSDK({ network: 'mainnet' })
 
   test('fetchTicksByContract', async () => {
     const tickdatas = await sdk.Pool.fetchTicks({
-      pool_id: USDT_USDC_POOL_10,
-      coinTypeA: TestnetCoin.USDT,
-      coinTypeB: TestnetCoin.USDC,
+      pool_id: "0x2e041f3fd93646dcc877f783c1f2b7fa62d30271bdef1f21ef002cebf857bded",
+      coinTypeA: MainnetCoin.CETUS,
+      coinTypeB: MainnetCoin.SUI,
     })
     console.log('fetchTicks: ', tickdatas)
   })
@@ -75,9 +79,9 @@ describe('Swap calculate Module', () => {
 
   test('preswap', async () => {
     const a2b = false
-    const pool = await sdk.Pool.getPool('0x6fd4915e6d8d3e2ba6d81787046eb948ae36fdfc75dad2e24f0d4aaa2417a416')
+    const pool = await sdk.Pool.getPool('0xb8d7d9e66a60c239e7a60110efcf8de6c705580ed924d0dde141f4a0e2c90105')
     const byAmountIn = false
-    const amount = '80000000000000'
+    const amount = '800000'
 
     const res: any = await sdk.Swap.preswap({
       pool: pool,

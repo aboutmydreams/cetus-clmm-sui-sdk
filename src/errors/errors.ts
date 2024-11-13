@@ -45,6 +45,7 @@ export enum PoolErrorCode {
   InvalidTickObjectId = `InvalidTickObjectId`,
   InvalidTickObject = `InvalidTickObject`,
   InvalidTickFields = `InvalidTickFields`,
+  PoolsNotFound = `PoolsNotFound`,
 }
 
 export enum PartnerErrorCode {

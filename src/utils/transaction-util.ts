@@ -931,7 +931,7 @@ export class TransactionUtil {
     const primaryCoinAObject = tx.object(primaryCoinA)
 
     let targetCoin: any = primaryCoinAObject
-    let tragetCoinAmount = selectedCoinsResult.amountArray.reduce((a, b) => Number(a) + Number(b), 0).toString()
+    const tragetCoinAmount = selectedCoinsResult.amountArray.reduce((a, b) => Number(a) + Number(b), 0).toString()
     let originalSplitedCoin
     if (mergeCoinAs.length > 0) {
       tx.mergeCoins(
@@ -942,7 +942,7 @@ export class TransactionUtil {
 
     if (fixAmount && Number(totalSelectedCoinAmount) > Number(amount)) {
       targetCoin = tx.splitCoins(primaryCoinAObject, [tx.pure.u64(amount)])
-      tragetCoinAmount = amount.toString()
+      // tragetCoinAmount = amount.toString()
       originalSplitedCoin = primaryCoinAObject
     }
 

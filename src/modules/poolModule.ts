@@ -33,7 +33,15 @@ import {
 import { CetusClmmSDK } from '../sdk'
 import { IModule } from '../interfaces/IModule'
 import { getObjectPreviousTransactionDigest } from '../utils/objects'
-import { ClmmpoolsError, ConfigErrorCode, PartnerErrorCode, PoolErrorCode, PositionErrorCode, UtilsErrorCode } from '../errors/errors'
+import {
+  ClmmpoolsError,
+  ConfigErrorCode,
+  PartnerErrorCode,
+  PoolErrorCode,
+  PositionErrorCode,
+  RouterErrorCode,
+  UtilsErrorCode,
+} from '../errors/errors'
 import { bcs } from '@mysten/bcs'
 
 type GetTickParams = {
@@ -297,6 +305,45 @@ export class PoolModule implements IModule {
     return pool
   }
 
+  async getPoolByCoins(coins: string[], feeRate?: number): Promise<Pool[]> {
+    if (coins.length === 0) {
+      return []
+    }
+
+    const url = this._sdk.sdkOptions.swapCountUrl!
+    const response = await fetch(url)
+    let json
+    try {
+      json = await response.json()
+    } catch (e) {
+      throw new ClmmpoolsError(`Failed tp [arse response from ${url}].`, RouterErrorCode.InvalidSwapCountUrl)
+    }
+    const pools = json.data.lp_list
+    if (!pools || pools.length === 0) {
+      throw new ClmmpoolsError(`Failed tp [arse response from ${url}].`, PoolErrorCode.PoolsNotFound)
+    }
+
+    const poolAddresses = []
+    for (const pool of pools) {
+      if (coins.includes(pool.coin_a_address) && coins.includes(pool.coin_b_address)) {
+        if (feeRate != null) {
+          if (pool.object.feeRate === feeRate) {
+            poolAddresses.push(pool.address)
+          }
+        } else {
+          poolAddresses.push(pool.address)
+        }
+      }
+    }
+
+    if (poolAddresses.length > 0) {
+      const poolObjects = await this.getPools(poolAddresses)
+      return poolObjects
+    }
+
+    return []
+  }
+
   /**
    * Creates a transaction payload for creating multiple pools.
    * @param {CreatePoolParams[]} paramss The parameters for the pools.
@@ -319,17 +366,22 @@ export class PoolModule implements IModule {
    * @param {CreatePoolParams | CreatePoolAddLiquidityParams} params
    * @returns {Promise<Transaction>}
    */
-  async creatPoolTransactionPayload(params: CreatePoolParams | CreatePoolAddLiquidityParams): Promise<Transaction> {
+  async creatPoolTransactionPayload(params: CreatePoolAddLiquidityParams): Promise<Transaction> {
     if (isSortedSymbols(normalizeSuiAddress(params.coinTypeA), normalizeSuiAddress(params.coinTypeB))) {
       const swpaCoinTypeB = params.coinTypeB
       params.coinTypeB = params.coinTypeA
       params.coinTypeA = swpaCoinTypeB
+
+      const metadataB = params.metadata_b
+      params.metadata_b = params.metadata_a
+      params.metadata_a = metadataB
     }
 
-    if ('fix_amount_a' in params) {
-      return await this.creatPoolAndAddLiquidity(params)
-    }
-    return await this.creatPool([params])
+    // if ('fix_amount_a' in params) {
+    return await this.creatPoolAndAddLiquidity(params)
+    // }
+
+    // return await this.creatPool([params])
   }
 
   /**
@@ -478,26 +530,8 @@ export class PoolModule implements IModule {
     const globalPauseStatusObjectId = eventConfig.global_config_id
     const poolsId = eventConfig.pools_id
     const allCoinAsset = await this._sdk.getOwnerCoinAssets(this._sdk.senderAddress)
-
-    const primaryCoinAInputsR = TransactionUtil.buildAddLiquidityFixTokenCoinInput(
-      tx,
-      !params.fix_amount_a,
-      params.amount_a,
-      params.slippage,
-      params.coinTypeA,
-      allCoinAsset,
-      false
-    )
-
-    const primaryCoinBInputsR = TransactionUtil.buildAddLiquidityFixTokenCoinInput(
-      tx,
-      params.fix_amount_a,
-      params.amount_b,
-      params.slippage,
-      params.coinTypeB,
-      allCoinAsset,
-      false
-    )
+    const primaryCoinAInputsR = TransactionUtil.buildCoinForAmount(tx, allCoinAsset, BigInt(params.amount_a), params.coinTypeA, false, true)
+    const primaryCoinBInputsR = TransactionUtil.buildCoinForAmount(tx, allCoinAsset, BigInt(params.amount_b), params.coinTypeB, false, true)
 
     const args = [
       tx.object(globalPauseStatusObjectId),
@@ -507,19 +541,23 @@ export class PoolModule implements IModule {
       tx.pure.string(params.uri),
       primaryCoinAInputsR.targetCoin,
       primaryCoinBInputsR.targetCoin,
-      tx.pure.u32(Number(asUintN(BigInt(params.tick_lower)).toString())),
-      tx.pure.u32(Number(asUintN(BigInt(params.tick_upper)).toString())),
-      tx.pure.u64(params.amount_a),
-      tx.pure.u64(params.amount_b),
+      tx.object(params.metadata_a),
+      tx.object(params.metadata_b),
       tx.pure.bool(params.fix_amount_a),
       tx.object(CLOCK_ADDRESS),
     ]
-
     tx.moveCall({
-      target: `${integrate.published_at}::${ClmmIntegratePoolV2Module}::create_pool_with_liquidity`,
+      target: `${integrate.published_at}::pool_creator::create_pool_v2`,
       typeArguments: [params.coinTypeA, params.coinTypeB],
       arguments: args,
     })
+
+    // if (params.fix_amount_a) {
+    TransactionUtil.buildTransferCoinToSender(this._sdk, tx, primaryCoinAInputsR.targetCoin, params.coinTypeA)
+    TransactionUtil.buildTransferCoinToSender(this._sdk, tx, primaryCoinBInputsR.targetCoin, params.coinTypeB)
+    // } else {
+    // }
+
     return tx
   }
 
@@ -545,7 +583,7 @@ export class PoolModule implements IModule {
       if (data.length < limit) {
         break
       }
-      start = [data[data.length - 1].index]
+      start = [Number(asUintN(BigInt(data[data.length - 1].index)))]
     }
     return ticks
   }
@@ -777,7 +815,8 @@ export class PoolModule implements IModule {
       showType: true,
     })
 
-    if (objectDataResponses[0].error != null || objectDataResponses[0].data?.content?.dataType !== 'moveObject') {
+
+    if (objectDataResponses[0].data?.content?.dataType !== 'moveObject') {
       throw new ClmmpoolsError(
         `get partner by object id: ${partner} error: ${objectDataResponses[0].error}`,
         PartnerErrorCode.NotFoundPartnerObject
@@ -790,14 +829,9 @@ export class PoolModule implements IModule {
 
     const coins: string[] = []
     objects.data.forEach((object) => {
-      if (object.error != null || object.data?.content?.dataType !== 'moveObject') {
-        throw new ClmmpoolsError(
-          `when getPartnerRefFeeAmount get partner object error: ${object.error}, please check the rpc, contracts address config and position id.`,
-          ConfigErrorCode.InvalidConfig
-        )
+      if (object.objectId != null) {
+        coins.push(object.objectId)
       }
-
-      coins.push(object.objectId)
     })
 
     const refFee: CoinAsset[] = []

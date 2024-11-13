@@ -1,10 +1,11 @@
-import CetusClmmSDK, { SdkOptions } from '@cetusprotocol/cetus-sui-clmm-sdk'
+import { getFullnodeUrl } from '@mysten/sui/client'
+import CetusClmmSDK, { SdkOptions } from '../main'
 
 const SDKConfig = {
   clmmConfig: {
-    pools_id: '0xc090b101978bd6370def2666b7a31d7d07704f84e833e108a969eda86150e8cf',
-    global_config_id: '0x6f4149091a5aea0e818e7243a13adcfb403842d670b9a2089de058512620687a',
-    global_vault_id: '0xf3114a74d54cbe56b3e68f9306661c043ede8c6615f0351b0c3a93ce895e1699',
+    pools_id: '0x50eb61dd5928cec5ea04711a2e9b72e5237e79e9fbcd2ce3d5469dc8708e0ee2',
+    global_config_id: '0x9774e359588ead122af1c7e7f64e14ade261cfeecdb5d0eb4a5b3b4c8ab8bd3e',
+    global_vault_id: '0xf78d2ee3c312f298882cb680695e5e8c81b1d441a646caccc058006c2851ddea',
     admin_cap_id: '0xa456f86a53fc31e1243f065738ff1fc93f5a62cc080ff894a0fb3747556a799b',
   },
   cetusConfig: {
@@ -20,9 +21,9 @@ const SDKConfig = {
 }
 
 export const clmmTestnet: SdkOptions = {
-  fullRpcUrl: 'https://testnet.artifact.systems/sui',
+  fullRpcUrl: getFullnodeUrl('testnet'),
   simulationAccount: {
-    address: '0xcd0247d0b67e53dde69b285e7a748e3dc390e8a5244eb9dd9c5c53d95e4cf0aa',
+    address: '0x0000000000000000000000000000000000000000000000000000000000000000',
   },
   faucet: {
     package_id: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc',
@@ -33,15 +34,14 @@ export const clmmTestnet: SdkOptions = {
     published_at: '0xf5ff7d5ba73b581bca6b4b9fa0049cd320360abd154b809f8700a8fd3cfaf7ca',
     config: SDKConfig.cetusConfig,
   },
-
   clmm_pool: {
-    package_id: '0x0868b71c0cba55bf0faf6c40df8c179c67a4d0ba0e79965b68b3d72d7dfbf666',
-    published_at: '0x084dbc14f8f6b50e4e1d6828ebf1f93fd1b1d2502b121bc787937893793417b0',
+    package_id: '0x0c7ae833c220aa73a3643a0d508afa4ac5d50d97312ea4584e35f9eb21b9df12',
+    published_at: '0x0c7ae833c220aa73a3643a0d508afa4ac5d50d97312ea4584e35f9eb21b9df12',
     config: SDKConfig.clmmConfig,
   },
   integrate: {
-    package_id: '0x8627c5cdcd8b63bc3daa09a6ab7ed81a829a90cafce6003ae13372d611fbb1a9',
-    published_at: '0xd55d88490e28ef68d83d2fe7862909dfcef6e43a2f50403f3a461c4678e274f1',
+    package_id: '0x2918cf39850de6d5d94d8196dc878c8c722cd79db659318e00bff57fbb4e2ede',
+    published_at: '0x2918cf39850de6d5d94d8196dc878c8c722cd79db659318e00bff57fbb4e2ede',
   },
   deepbook: {
     package_id: '0x000000000000000000000000000000000000000000000000000000000000dee9',
@@ -52,7 +52,21 @@ export const clmmTestnet: SdkOptions = {
     published_at: '0x56d90d0c055edb534b11e7548270bb458fd47c69b77bf40c14d5eb00e6e6cf64',
   },
   aggregatorUrl: 'https://api-sui.devcetus.com/router',
-  swapCountUrl: 'https://api-sui.devcetus.com/v2/sui/pools_info',
+  swapCountUrl: 'https://api-sui.devcetus.com/v2/sui/swap/count',
 }
 
-export const TestnetSDK = new CetusClmmSDK(clmmTestnet)
+/**
+ * Initialize the testnet SDK
+ * @param fullNodeUrl. If provided, it will be used as the full node URL.
+ * @param simulationAccount. If provided, it will be used as the simulation account address.
+ * @returns
+ */
+export function initTestnetSDK(fullNodeUrl?: string, simulationAccount?: string): CetusClmmSDK {
+  if (fullNodeUrl) {
+    clmmTestnet.fullRpcUrl = fullNodeUrl
+  }
+  if (simulationAccount) {
+    clmmTestnet.simulationAccount.address = simulationAccount
+  }
+  return new CetusClmmSDK(clmmTestnet)
+}

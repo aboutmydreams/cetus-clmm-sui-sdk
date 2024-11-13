@@ -1,4 +1,5 @@
-import { CetusClmmSDK, SdkOptions } from '@cetusprotocol/cetus-sui-clmm-sdk'
+import { getFullnodeUrl } from '@mysten/sui/client'
+import CetusClmmSDK, { SdkOptions } from '../../src'
 
 const SDKConfig = {
   clmmConfig: {
@@ -21,7 +22,7 @@ const SDKConfig = {
 
 // mainnet
 export const clmmMainnet: SdkOptions = {
-  fullRpcUrl: 'https://sui-mainnet-endpoint.blockvision.org/',
+  fullRpcUrl: getFullnodeUrl('mainnet'),
   simulationAccount: {
     address: '0x326ce9894f08dcaa337fa232641cc34db957aec9ff6614c1186bc9a7508df0bb',
   },
@@ -48,7 +49,24 @@ export const clmmMainnet: SdkOptions = {
     published_at: '0xac95e8a5e873cfa2544916c16fe1461b6a45542d9e65504c1794ae390b3345a7',
   },
   aggregatorUrl: 'https://api-sui.cetus.zone/router',
-  swapCountUrl: 'https://api-sui.cetus.zone/v2/sui/swap/count',
+  swapCountUrl: 'https://api-sui.cetus.zone/v2/sui/pools_info',
 }
 
-export const SDK = new CetusClmmSDK(clmmMainnet)
+/**
+ * Initialize the mainnet SDK
+ * @param fullNodeUrl. If provided, it will be used as the full node URL.
+ * @param simulationAccount. If provided, it will be used as the simulation account address.
+ * @returns
+ */
+export function initMainnetSDK(
+  fullNodeUrl?: string,
+  simulationAccount?: string
+): CetusClmmSDK {
+  if (fullNodeUrl) {
+    clmmMainnet.fullRpcUrl = fullNodeUrl
+  }
+  if (simulationAccount) {
+    clmmMainnet.simulationAccount.address = simulationAccount
+  }
+  return new CetusClmmSDK(clmmMainnet)
+}

@@ -73,7 +73,7 @@ export function fromDecimalsAmount(amount: number | string, decimals: number | s
 export function secretKeyToEd25519Keypair(secretKey: string | Uint8Array, ecode: 'hex' | 'base64' = 'hex'): Ed25519Keypair {
   if (secretKey instanceof Uint8Array) {
     const key = Buffer.from(secretKey)
-    return Ed25519Keypair.fromSecretKey(key)
+    return Ed25519Keypair.fromSecretKey(new Uint8Array(key))
   }
 
   const hexKey = ecode === 'hex' ? fromHEX(secretKey) : fromB64(secretKey)
@@ -89,7 +89,7 @@ export function secretKeyToEd25519Keypair(secretKey: string | Uint8Array, ecode:
 export function secretKeyToSecp256k1Keypair(secretKey: string | Uint8Array, ecode: 'hex' | 'base64' = 'hex'): Secp256k1Keypair {
   if (secretKey instanceof Uint8Array) {
     const key = Buffer.from(secretKey)
-    return Secp256k1Keypair.fromSecretKey(key)
+    return Secp256k1Keypair.fromSecretKey(new Uint8Array(key))
   }
   const hexKey = ecode === 'hex' ? fromHEX(secretKey) : fromB64(secretKey)
   return Secp256k1Keypair.fromSecretKey(hexKey)

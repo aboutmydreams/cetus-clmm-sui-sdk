@@ -1,14 +1,14 @@
-import { Base64 } from 'js-base64'
 import { SuiObjectResponse } from '@mysten/sui/client'
 import { normalizeSuiObjectId } from '@mysten/sui/utils'
-import { CetusConfigs, ClmmPoolConfig, CoinConfig, getPackagerConfigs, LaunchpadPoolConfig } from '../types'
-import { SuiResource, SuiAddressType } from '../types/sui'
+import { Base64 } from 'js-base64'
+import { ClmmpoolsError, ConfigErrorCode } from '../errors/errors'
+import { IModule } from '../interfaces/IModule'
+import { CetusClmmSDK } from '../sdk'
+import { CetusConfigs, ClmmPoolConfig, CoinConfig, LaunchpadPoolConfig, getPackagerConfigs } from '../types'
+import { SuiAddressType, SuiResource } from '../types/sui'
 import { CachedContent, cacheTime24h, cacheTime5min, getFutureTime } from '../utils/cachedContent'
 import { extractStructTagFromType, fixCoinType, normalizeCoinType } from '../utils/contracts'
-import { CetusClmmSDK } from '../sdk'
-import { IModule } from '../interfaces/IModule'
 import { getObjectFields, getObjectId, getObjectPreviousTransactionDigest, getObjectType } from '../utils/objects'
-import { ClmmpoolsError, ConfigErrorCode } from '../errors/errors'
 
 /**
  * Helper class to help interact with clmm pool and coin and launchpad pool config.
@@ -348,7 +348,12 @@ export class ConfigModule implements IModule {
       let { value } = item.fields
       if (key === 'labels') {
         try {
-          value = JSON.parse(decodeURIComponent(Base64.decode(value)))
+          const decodedValue = decodeURIComponent(Base64.decode(value))
+          try {
+            value = JSON.parse(decodedValue)
+          } catch {
+            value = decodedValue
+          }
         } catch (error) {}
       }
       if (transformExtensions) {

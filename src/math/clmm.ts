@@ -389,7 +389,7 @@ export function estimateLiquidityForCoinA(sqrtPriceX: BN, sqrtPriceY: BN, coinAm
   const upperSqrtPriceX64 = BN.max(sqrtPriceX, sqrtPriceY)
   const num = MathUtil.fromX64_BN(coinAmount.mul(upperSqrtPriceX64).mul(lowerSqrtPriceX64))
   const dem = upperSqrtPriceX64.sub(lowerSqrtPriceX64)
-  return num.div(dem)
+  return !num.isZero() && !dem.isZero() ? num.div(dem) : new BN(0)
 }
 
 /**
@@ -403,7 +403,7 @@ export function estimateLiquidityForCoinB(sqrtPriceX: BN, sqrtPriceY: BN, coinAm
   const lowerSqrtPriceX64 = BN.min(sqrtPriceX, sqrtPriceY)
   const upperSqrtPriceX64 = BN.max(sqrtPriceX, sqrtPriceY)
   const delta = upperSqrtPriceX64.sub(lowerSqrtPriceX64)
-  return coinAmount.shln(64).div(delta)
+  return !delta.isZero() ? coinAmount.shln(64).div(delta) : new BN(0)
 }
 
 export class ClmmPoolUtil {
