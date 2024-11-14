@@ -1,6 +1,5 @@
 /node_modules
 .DS_Store
-dist/**/*
 /.vscode/
 package.test.json
 /examples/node_modules
