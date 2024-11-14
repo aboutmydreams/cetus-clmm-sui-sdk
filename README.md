@@ -48,7 +48,7 @@ If you wish to set your own full node URL and simulate address, you can do so as
   const network = 'mainnnet';
   const fullNodeUrl = "https://..."
   const simulationAccount = "0x..."
-  const cetusClmmSDK = initCetusSDK(network, fullNodeUrl, simulationAccount)
+  const cetusClmmSDK = initCetusSDK({network, fullNodeUrl, simulationAccount})
   ```
 
 Now, you can start using Cetus SDK.
