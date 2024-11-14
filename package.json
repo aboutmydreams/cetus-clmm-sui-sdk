@@ -1,11 +1,16 @@
 {
   "name": "cetus-clmm-sui-sdk",
-  "version": "5.1.9",
+  "version": "5.1.13",
   "private": false,
   "description": "SDK for cetus swap and liquidity",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
   "scripts": {
     "test": "jest",
     "lint:fix": "eslint src/*.ts src/**/*.ts --fix",
@@ -17,7 +22,8 @@
     "_build:browser": "tsup --platform browser --format iife --global-name cetusAptosSDK --minify",
     "_build:node": "tsup --format cjs,esm --dts",
     "build:doc": "npx typedoc",
-    "publish:test": "node version.js && npm publish --tag experimental --access public"
+    "publish:test": "node version.js && npm publish --tag experimental --access public",
+    "publish:release": "node version-release.js && npm publish  --access public"
   },
   "repository": {
     "type": "git",
@@ -50,7 +56,7 @@
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
     "tsup": "^6.7.0",
-    "typedoc": "^0.24.8",
+    "typedoc": "^0.26.11",
     "typescript": "^5.6.3"
   },
   "peerDependencies": {
