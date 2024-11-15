@@ -1,6 +1,6 @@
 {
   "name": "cetus-clmm-sui-sdk",
-  "version": "5.1.13",
+  "version": "5.1.16",
   "private": false,
   "description": "SDK for cetus swap and liquidity",
   "typings": "dist/index.d.ts",
@@ -23,7 +23,7 @@
     "_build:node": "tsup --format cjs,esm --dts",
     "build:doc": "npx typedoc",
     "publish:test": "node version.js && npm publish --tag experimental --access public",
-    "publish:release": "node version-release.js && npm publish  --access public"
+    "publish:release": "npm run build:tsup && node version-release.js && npm publish  --access public"
   },
   "repository": {
     "type": "git",
